@@ -20,32 +20,30 @@ MUTATION_COLOR_AMOUNT = 0.02
 
 ### mutation probability
 MUTATION_PROBABILITY = 0.7
-MUTATION_PROBABILITY_X_Y_AMOUNT = 0.3
-MUTATION_PROBABILITY_RADIUS_AMOUNT = 0.3
-MUTATION_PROBABILITY_COLOR_AMOUNT = 0.3
 
 ### Add and delete probability
 CIRCLES_ADD_PROBABLITY = 1
-CIRCLES_ADD_TYPE_PROBABLITY = 0.5
 CIRCLES_DELETE_PROBABLITY = 0.3
 
-
-
+# Local Path 
 FILEPATH = os.path.abspath(__file__)
 FILEDIR = FILEPATH.replace(os.path.basename(FILEPATH), "")
 
-FILENAME = "fiji.png"
+FILENAME = "fuji.png"
 
 og_image_file = Image.open(FILEDIR + FILENAME, "r")
+# save image as uint64 np array
 og_image = np.array(og_image_file, dtype=np.uint64)
 
+# Get width, height of the original image
 width, height = og_image_file.size
 print(width, height)
 
+# set black canvas
 blank = Image.new("RGB", (width, height), (255, 255, 255, 255))
 
 
-# to get cordinates from decimal to x0,y0 x1, y1
+# to get cordinates from decimal to (x0, y0) (x1, y1)
 def get_ellipse_coordinates(x, y, radius_norm, width, height):
     def map_coordinates_to_ellipse(x, y, radius_norm, width, height):
         canvas_x, canvas_y = int(x * width), int(y * height)
@@ -54,14 +52,13 @@ def get_ellipse_coordinates(x, y, radius_norm, width, height):
             (canvas_x - canvas_radius, canvas_y - canvas_radius),
             (canvas_x + canvas_radius, canvas_y + canvas_radius),
         ]
-
     ellipse_coords = map_coordinates_to_ellipse(x, y, radius_norm, width, height)
     return ellipse_coords
 
 
-# Mapping the value from [0, 1] to [0.008, 0.11] used for radius
+# Mapping the value from [0, 1] to [0.008, 0.045] used for radius
 def map_rad(value):
-    mapped_value = 0.008 + (value * 0.035)
+    mapped_value = 0.008 + (value * 0.045)
     return mapped_value
 
 
@@ -79,7 +76,7 @@ def map_sl(value):
     rounded_value = round(mapped_value, 2)  # Round to two decimal places
     return rounded_value
 
-
+# draw a canvas with the circles and return the np array of the color values
 def draw(chroma):
     image = Image.new("RGBA", (width, height), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
@@ -90,12 +87,9 @@ def draw(chroma):
             "hsl(" + str(map_h(h)) + "," + str(map_sl(s)) + "%," + str(map_sl(l)) + "%)"
         )
         draw.ellipse(coords, fill=circle_color, outline=None, width=1)
-    # print(x,y,r,h,s,l)
-
-    # image.show()
     return np.array(image, dtype=np.uint64)
 
-
+# draw a canvas with the circles and display the image
 def draw_display(chroma):
     image = Image.new("RGBA", (width, height), color=(255, 255, 255, 255))
     draw = ImageDraw.Draw(image)
@@ -109,6 +103,7 @@ def draw_display(chroma):
 
     image.show()
 
+# draw a canvas with the circles and return for saving
 def draw_save(chroma):
     image = Image.new("RGBA", (width, height), color=(255, 255, 255, 255))
     draw = ImageDraw.Draw(image)
@@ -122,7 +117,7 @@ def draw_save(chroma):
 
     return image
 
-
+# fitness function
 def fitness(generated_image):
     # Ensure both images have the same shape
     if og_image.shape != generated_image.shape:
@@ -132,6 +127,7 @@ def fitness(generated_image):
     pix2 = np.array(generated_image, dtype=np.uint64)
     return round(np.sqrt(np.square(pix1 - pix2).sum(axis=-1)).sum(), 8)
 
+# fitness function for 2 chromosones
 def draw_fitness(chroma, chroma2):
     pix = draw(chroma)
     fit = fitness(pix)
@@ -139,7 +135,7 @@ def draw_fitness(chroma, chroma2):
     fit2 = fitness(pix2)
     return fit, fit2
 
-
+# one point crossover
 def crossover(parent1, parent2):
     # Randomly select a crossover point (assuming the chromosome has the same length)
     crossover_point = rd.randint(1, len(parent1) - 1)
@@ -149,16 +145,7 @@ def crossover(parent1, parent2):
     child2 = np.vstack((parent2[:crossover_point], parent1[crossover_point:]))
     return child1, child2
 
-def one_point_crossover(parent1, parent2):
-    # Select a random crossover point
-    crossover_point = np.random.randint(1, len(parent1) - 1)  # Exclude ends
-
-    # Perform crossover to create two children
-    child1 = np.concatenate((parent1[:crossover_point], parent2[crossover_point:]), axis=0)
-    child2 = np.concatenate((parent2[:crossover_point], parent1[crossover_point:]), axis=0)
-
-    return child1, child2
-
+# uniform crossover
 def uniform_crossover(parent1, parent2):
     max_length = max(len(parent1), len(parent2))
     
@@ -180,7 +167,7 @@ def uniform_crossover(parent1, parent2):
     
     return child1, child2
 
-
+# convert from normal array to numpy_array
 def convert_to_numpy_array(list_of_arrays):
     # Find the maximum length among the arrays
     max_length = max(len(arr) for arr in list_of_arrays)
@@ -193,15 +180,18 @@ def convert_to_numpy_array(list_of_arrays):
     
     return numpy_array
 
+# convert from normal array to numpy_array for 2 arrays
 def convert_to_numpy_array2(list1, list2):
     valof1 = convert_to_numpy_array(list1)
     valof2 = convert_to_numpy_array(list2)
     return valof1,valof2
 
+# picker for scalar
 def value_picker():
     values = [1.2, 1.15, 1.1, 1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7]
     return rd.choice(values)
 
+# mutate functions
 def mutate_X(gene, scaler):
     x_change = np.random.uniform(-MUTATION_X_Y_AMOUNT * scaler, MUTATION_X_Y_AMOUNT * scaler)
     gene[0] = min(max(gene[0] + x_change, 0), 1)
@@ -228,6 +218,7 @@ def mutate_color_l(gene, scaler):
     gene[5] = min(max(gene[5] + np.random.uniform(-MUTATION_COLOR_AMOUNT * scaler, MUTATION_COLOR_AMOUNT * scaler), 0), 1)
     return gene
 
+# make new Jean from 2 parents
 def new_gene_make(parent1, parent2):
     # Select a random crossover point
     crossover_point = np.random.randint(1, len(parent1) - 1)  # Exclude ends
@@ -238,6 +229,7 @@ def new_gene_make(parent1, parent2):
 
     return child1
 
+# given a number of types of mutations to make choose which ones to make
 def apply_random_mutations(gene, scaler, num_mutations):
     mutation_functions = [mutate_X, mutate_Y, mutate_radius, mutate_color_h, mutate_color_s, mutate_color_l]
     selected_mutations = np.random.choice(mutation_functions, num_mutations, replace=False)
@@ -245,19 +237,17 @@ def apply_random_mutations(gene, scaler, num_mutations):
         gene = mutation(gene, scaler)
     return gene   
 
-def do_nothing(gene, scaler):
-    # This function does nothing and returns the gene array as is
-    return gene
-
+# Mutation function
 def mutation(chromo):
     changed_chromo = []
     
     for i in chromo:
         ##### to change the scale of the mutation not always same
-        if random() < 0.75:
-            scaler = value_picker()
-        else:
-            scaler = 1
+        # if random() < 0.75:
+        #     scaler = value_picker()
+        # else:
+        #     scaler = 1
+        scaler = 1
         if random() < MUTATION_PROBABILITY:
             changed_chromo.append(apply_random_mutations(i, scaler, np.random.randint(1, 7)))
         else:
@@ -270,6 +260,7 @@ def mutation(chromo):
     else:
         new_gene = np.around(np.random.random((6)), decimals=10)  
         changed_chromo = np.vstack((changed_chromo, new_gene))
+    # Can choose from randomly generating a new jean or from 2 parents using one point crossover
         # if random() < CIRCLES_ADD_TYPE_PROBABLITY:
         #     new_gene = np.around(np.random.random((6)), decimals=10)  
         #     changed_chromo = np.vstack((changed_chromo, new_gene))
@@ -278,10 +269,9 @@ def mutation(chromo):
         #     rd2 = chromo[rd.randint(1, len(chromo)-1)]
         #     new_gene = new_gene_make(rd1, rd2)
         #     changed_chromo = np.vstack((changed_chromo, new_gene))
-        
     return changed_chromo
 
-# randomize position of the circles ex front to back
+# randomize position of the circles ex front to back (not used)
 def randomizer(chromo):
     np.random.shuffle(chromo)
     return chromo
@@ -289,9 +279,12 @@ def randomizer(chromo):
 population = []
 next_Gen_Population = []
 
+# make inital population 
 for _ in range(POPULATION_SIZE):
+    # a gene is array of 6 random values from 1 to 0
     chromosome = np.around(np.random.random((NUMBER_CIRCLES, 6)), decimals=10)
     pix = draw(chromosome)
+    # calculate fitness
     fit = fitness(pix)
 
     # append fitness and chrmo
@@ -302,11 +295,13 @@ for generation in range(GENERATIONS):
     for g in population:
         new_population.append(g)
 
+    # sort population by fitness 
     population.sort(key=lambda x: x[0])
 
     print(f"=== Generation {generation+1} ===")
     print(f"Best Fitness: {population[0][0]}")
-    if generation % 60 == 0:
+    # save image and population every 50 generations
+    if generation % 50 == 0:
 
         file_path = os.path.join(FILEDIR, "population_data.json")  # File path using FILEDIR
 
@@ -322,25 +317,31 @@ for generation in range(GENERATIONS):
         ig.save(FILEDIR+f'{generation}.png')
     print(len(population[0][1]))
 
+    # Kill half the population
     next_generation = population[: POPULATION_SIZE // 2]
 
-    #print(len(next_generation))
+    for i in range(POPULATION_SIZE // 2):
+        # choose 2 random parents and check if they are the same if so choose again
+        top = len(next_generation)-1
+        rd_1 = rd.randint(0, top)
+        rd_2 = rd.randint(0, top)
+        while rd_2 == 1 or rd_2 == rd_1:
+            rd_2 = rd.randint(0, top)
 
-    for i in range(POPULATION_SIZE // 4):
-        parent1 = next_generation[i * 2][1]
-        parent2 = next_generation[i * 2 + 1][1]
+        parent1 = next_generation[rd_1][1]
+        parent2 = next_generation[rd_2][1]
+        # crossover 
         child1, child2 = uniform_crossover(parent1, parent2)
-
         ch1, ch2 = convert_to_numpy_array2(child1, child2)
+        # mutation
         mut1 = mutation(ch1)
         mut2 = mutation(ch2)
         c1, c2 = convert_to_numpy_array2(mut1, mut2)
-
+        # calculate fitness
         fit1, fit2 = draw_fitness(c1,c2)
         next_generation.append((fit1 , c1))
         next_generation.append((fit2 , c2))
 
-
     population = next_generation    
-    #print("next_Gen_Population", population)
+
 

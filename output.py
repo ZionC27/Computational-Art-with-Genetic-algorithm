@@ -12,14 +12,17 @@ FILEDIR = FILEPATH.replace(os.path.basename(FILEPATH), "")
 population = []
 
 
-FILENAME = "fiji.png"
+FILENAME = "fuji.png"
 
 og_image_file = Image.open(FILEDIR + FILENAME, "r")
+# save image as uint64 np array
 og_image = np.array(og_image_file, dtype=np.uint64)
 
+# Get width, height of the original image
 width, height = og_image_file.size
 print(width, height)
 
+# draw a canvas with the circles and return for saving
 def draw_save(chroma):
     image = Image.new("RGBA", (width, height), color=(255, 255, 255, 255))
     draw = ImageDraw.Draw(image)
@@ -49,7 +52,7 @@ def get_ellipse_coordinates(x, y, radius_norm, width, height):
 
 # Mapping the value from [0, 1] to [0.008, 0.11] used for radius
 def map_rad(value):
-    mapped_value = 0.008 + (value * 0.035)
+    mapped_value = 0.008 + (value * 0.045)
     return mapped_value
 
 
@@ -77,6 +80,7 @@ with open(file_path, 'r') as file:
 
 population = [(fit, np.array(chromo)) for fit, chromo in population]
 
+# draw out the 5 best images
 for i in range(5):
     ig = draw_save(population[0][1])
     ig.save(FILEDIR+f'best{i+1}.png')
