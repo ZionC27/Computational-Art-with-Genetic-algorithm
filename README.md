@@ -38,7 +38,7 @@ Constants and values
       return mapped_value
 ```
 They can all be modified to get different outcomes.
-
+## Gallery
 ![fuji](https://github.com/ZionC27/Computational-Art-with-Genetic-algorithm/assets/56661548/8df77624-816e-48e1-85e5-7beb0b83880b)
 ![21800](https://github.com/ZionC27/Computational-Art-with-Genetic-algorithm/assets/56661548/a167c99a-2d5a-41b7-9800-391bd6164578)
 21800 Generations, 1000 Initial circles Population 200
