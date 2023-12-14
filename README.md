@@ -4,9 +4,14 @@
 ## Requirements to run: 
 Python: version 3.9 and above should work
 
-Pillow (PIL): version 10.1.0 and above can be installed with "pip install Pillow"
-
-Numpy: version1.22 and above can be installed with "pip install numpy"
+Pillow (PIL): version 10.1.0 and above can be installed with
+```
+pip install Pillow
+```
+Numpy: version1.22 and above can be installed with
+```
+pip install numpy
+```
 
 ## File structure
 **Main.py**: used to start the initial run, choose a PNG image, put it in the same directory, find "FILENAME" in the code, change your filename.png, and run.
