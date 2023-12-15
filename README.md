@@ -1,5 +1,41 @@
 # Computational-Art-with-Genetic-algorithm
-  This program aims to use a Genetic algorithm to recreate an image using circles.
+
+
+This project employs a genetic algorithm to iteratively generate an image resembling an original image. The methodology involves several key steps and processes:
+
+## Methodology Overview
+
+### A. Population Creation
+- Chromosomes encapsulate genes representing circles to be drawn on the canvas.
+- Initial creation of chromosomes involves random values for X, and Y coordinates, radius of the circle, and HSL values. ()
+- Flexibility allows adjusting the number of circles and population size for experimentation.
+
+### B. Drawing the Image
+- Utilizes extracted genes to draw circles based on their parameters.
+- Maps 1 or 0 values to appropriate HSL parameters, radius, and coordinates.
+- Dynamic adjustment of radius for optimal outcomes.
+
+### C. Fitness Function
+- Compares original and generated images pixel-wise.
+- Utilizes Root Mean Square Error (RMSE) for quantifying image similarity.
+- Provides a fitness score indicating proximity between the images.
+
+### D. Generation Loop
+- Sorts chromosomes based on fitness, retains top performers and discards the lower half.
+- Periodically stores populations to a JSON file for progress backup.
+- Executes crossover and mutation functions for subsequent generations.
+
+### E. Crossover
+- Randomly selects parent chromosomes and performs uniform crossover for gene swapping.
+
+### F. Mutation
+- Operates on genes within chromosomes, introducing alterations based on assigned probabilities.
+- Allows changes in coordinates, radius, and HSL values with adjustable magnitudes.
+- Includes addition or deletion of genes, favoring a higher chance of adding new genes.
+
+## Conclusion
+This algorithmic approach aims to progressively generate an image resembling the original by refining circles' attributes using genetic operations like crossover and mutation. The fitness function enables efficient evaluation, guiding the iterative process towards image resemblance.
+
 
 ## Requirements to run: 
 Python: version 3.9 and above should work
